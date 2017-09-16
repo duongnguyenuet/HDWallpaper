@@ -3,6 +3,7 @@ package com.binary.hdwallpaper.ui.main;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,7 @@ import butterknife.ButterKnife;
  * Created by duong on 9/8/2017.
  */
 
-public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ImageViewHolder> {
     private ArrayList<Image> images;
     private Context context;
     private OnItemClickListener onItemClickListener;
@@ -38,15 +39,24 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image,parent,false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_image,parent,false);
         return new ImageViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ImageViewHolder viewHolder = (ImageViewHolder) holder;
+    public void onBindViewHolder(ImageViewHolder holder, int position) {
         Image image = images.get(position);
-        viewHolder.setData(image);
+        Glide.with(context)
+                .load(image.getWallpagerImageThumb())
+                .placeholder(android.R.drawable.screen_background_light)
+                .error(android.R.drawable.screen_background_dark)
+                .centerCrop()
+                .into(holder.ivImage);
+        holder.tvId.setText("Id : " + image.getId());
+        holder.tvCatId.setText("Cat id : " + image.getCatId());
+        holder.tvCategoryName.setText("Cat name : " + image.getCategoryName());
+        holder.tvTotalViews.setText("Total views : " + image.getTotalViews());
+        Log.e("xxx","xxx");
     }
 
     @Override
@@ -72,19 +82,6 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ButterKnife.bind(this,itemView);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
-        }
-
-        public void setData(Image image) {
-            Glide.with(context)
-                    .load(image.getWallpagerImageThumb())
-                    .placeholder(android.R.drawable.screen_background_light)
-                    .error(android.R.drawable.screen_background_dark)
-                    .centerCrop()
-                    .into(ivImage);
-            tvId.setText("Id : " + image.getId());
-            tvCatId.setText("Cat id : " + image.getCatId());
-            tvCategoryName.setText("Cat name : " + image.getCategoryName());
-            tvTotalViews.setText("Total views : " + image.getTotalViews());
         }
 
         @Override

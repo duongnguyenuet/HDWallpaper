@@ -2,6 +2,8 @@ package com.binary.hdwallpaper.ui.main;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,24 +20,19 @@ import android.widget.PopupMenu;
 
 import com.binary.hdwallpaper.MyApplication;
 import com.binary.hdwallpaper.R;
-import com.binary.hdwallpaper.api.WallpaperAPI;
+
 import com.binary.hdwallpaper.models.Image;
-import com.binary.hdwallpaper.models.ImageList;
-import com.binary.hdwallpaper.di.module.NetModule;
+
+import com.binary.hdwallpaper.ui.main.category.CategoryFragment;
 import com.stfalcon.frescoimageviewer.ImageViewer;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainView {
@@ -45,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     RecyclerView recyclerView;
     private ProgressDialog progressDialog;
     private MainAdapter adapter;
-    private ArrayList<Image> images = new ArrayList<>();
+    private ArrayList<Image> arrImage = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,17 +75,17 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setHomeButtonEnabled(true);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MainAdapter(images);
+        adapter = new MainAdapter(arrImage);
         adapter.setOnItemClickListener(new MainAdapter.OnItemClickListener() {
             @Override
             public void onClick(View view, int position) {
-                mMainPresenter.creatImageViewer(MainActivity.this,view,position,images);
+                mMainPresenter.creatImageViewer(MainActivity.this,view,position,arrImage);
             }
         });
         adapter.setOnItemLongClickListener(new MainAdapter.OnItemLongClickListener() {
             @Override
             public void onLongClick(View view, int position) {
-                mMainPresenter.createPopUpMenu(MainActivity.this,view,position,images);
+                mMainPresenter.createPopUpMenu(MainActivity.this,view,position,arrImage);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -97,7 +94,7 @@ public class MainActivity extends AppCompatActivity
     public void initPresenter(){
         MyApplication application = (MyApplication) getApplication();
         application.getmAppComponent().inject(this);
-        mMainPresenter.attachView((MainView) this);
+        mMainPresenter.attachView(this);
     }
 
     public void initProgress(){
@@ -141,23 +138,22 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        Fragment fragment = null;
+        Class fragmentClass = null;
+        if (id == R.id.nav_latest) {
+        } else if (id == R.id.nav_category) {
+            fragmentClass = CategoryFragment.class;
         }
-
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_layout,fragment).commit();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -176,7 +172,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void showImage(ArrayList<Image> images) {
-        images.addAll(images);
+        arrImage.addAll(images);
         adapter.notifyDataSetChanged();
     }
 

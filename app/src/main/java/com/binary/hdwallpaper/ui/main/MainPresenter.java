@@ -71,9 +71,8 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
             @Override
             public void onResponse(Call<ImageList> call, Response<ImageList> response) {
                 getmMvpView().hideProgress(progressDialog);
-                ArrayList<Image> images = response.body().getArrImage();
-                getmMvpView().showImage(images);
-                Log.e("Image","Loaded");
+                ImageList images = response.body();
+                getmMvpView().showImage(images.getArrImage());
             }
 
             @Override
